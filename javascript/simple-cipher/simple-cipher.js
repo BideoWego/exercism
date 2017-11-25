@@ -37,13 +37,16 @@ class Cipher {
     let encoded = '';
     for (let i = 0; i < str.length; i++) {
       const strChar = str[i];
-      const keyChar = this.key[i];
       const strCharCode = strChar.charCodeAt(0);
+      const keyIndex = i % this.key.length;
+      const keyChar = this.key[keyIndex];
       const keyCharCode = keyChar.charCodeAt(0);
-      const shiftAmount = keyCharCode - _aCode;
-      const shiftedCode = strCharCode + shiftAmount > _zCode ?
-        _aCode + (strCharCode + shiftAmount - _zCode) :
-        strCharCode + shiftAmount;
+      let shiftedCode = strCharCode + this._map[keyChar];
+      if (shiftedCode > _zCode) {
+        const first = _aCode - 1;
+        const diff = shiftedCode - _zCode;
+        shiftedCode = first + diff;
+      }
       const encodedChar = String.fromCharCode(shiftedCode);
       encoded += encodedChar;
     }
@@ -54,13 +57,16 @@ class Cipher {
     let decoded = '';
     for (let i = 0; i < str.length; i++) {
       const strChar = str[i];
-      const keyChar = this.key[i];
-      const strCharCode = keyChar.charCodeAt(0);
-      const keyCharCode = strChar.charCodeAt(0);
-      const shiftAmount = keyCharCode - _aCode;
-      const shiftedCode = strCharCode - shiftAmount < _aCode ?
-        _zCode - (strCharCode - shiftAmount + _aCode) :
-        strCharCode - shiftAmount;
+      const strCharCode = strChar.charCodeAt(0);
+      const keyIndex = i % this.key.length;
+      const keyChar = this.key[keyIndex];
+      const keyCharCode = keyChar.charCodeAt(0);
+      let shiftedCode = strCharCode - this._map[keyChar];
+      if (shiftedCode < _aCode) {
+        const last = _zCode + 1;
+        const diff = _aCode - shiftedCode;
+        shiftedCode = last - diff;
+      }
       decoded += String.fromCharCode(shiftedCode);
     }
     return decoded;
