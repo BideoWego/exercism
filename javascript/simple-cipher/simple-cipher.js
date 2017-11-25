@@ -3,14 +3,11 @@ const _aCode = 97;
 const _zCode = _aCode + 25;
 const _alpha = 'abcdefghijklmnopqrstuvwxyz';
 
-const _map = () => {
-  const map = {};
-  for (let i = 0; i <= 25; i++) {
-    const char = String.fromCharCode(_aCode + i);
-    map[char] = i;
-  }
-  return map;
-};
+const _map = Array.apply(null, Array(26)).reduce((obj, n, i) => {
+  const key = String.fromCharCode(_aCode + i);
+  obj[key] = i;
+  return obj;
+}, {});
 
 const _key = () => {
   const empty = Array(100);
@@ -44,7 +41,7 @@ const _crypt = (cipher, str, direction) => {
     const keyIndex = i % cipher.key.length;
     const keyChar = cipher.key[keyIndex];
     const keyCharCode = keyChar.charCodeAt(0);
-    let shiftedCode = strCharCode + cipher._map[keyChar] * direction;
+    let shiftedCode = strCharCode + _map[keyChar] * direction;
     shiftedCode = _wrap(shiftedCode, -1 * direction);
     const encodedChar = String.fromCharCode(shiftedCode);
     crypted += encodedChar;
@@ -59,7 +56,6 @@ class Cipher {
       throw new Error("Bad key");
     }
     this.key = key;
-    this._map = _map();
   }
 
   encode(str) {
