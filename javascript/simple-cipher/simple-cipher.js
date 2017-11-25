@@ -23,6 +23,35 @@ const _key = () => {
     .join('');
 };
 
+const _wrap = (code, direction) => {
+  if (code > _zCode) {
+    const first = _aCode + direction;
+    const diff = code - _zCode;
+    code = first + diff;
+  } else if (code < _aCode) {
+    const last = _zCode + direction;
+    const diff = _aCode - code;
+    code = last - diff;
+  }
+  return code;
+};
+
+const _crypt = (cipher, str, direction) => {
+  let crypted = '';
+  for (let i = 0; i < str.length; i++) {
+    const strChar = str[i];
+    const strCharCode = strChar.charCodeAt(0);
+    const keyIndex = i % cipher.key.length;
+    const keyChar = cipher.key[keyIndex];
+    const keyCharCode = keyChar.charCodeAt(0);
+    let shiftedCode = strCharCode + cipher._map[keyChar] * direction;
+    shiftedCode = _wrap(shiftedCode, -1 * direction);
+    const encodedChar = String.fromCharCode(shiftedCode);
+    crypted += encodedChar;
+  }
+  return crypted;
+};
+
 
 class Cipher {
   constructor(key=_key()) {
@@ -34,42 +63,11 @@ class Cipher {
   }
 
   encode(str) {
-    let encoded = '';
-    for (let i = 0; i < str.length; i++) {
-      const strChar = str[i];
-      const strCharCode = strChar.charCodeAt(0);
-      const keyIndex = i % this.key.length;
-      const keyChar = this.key[keyIndex];
-      const keyCharCode = keyChar.charCodeAt(0);
-      let shiftedCode = strCharCode + this._map[keyChar];
-      if (shiftedCode > _zCode) {
-        const first = _aCode - 1;
-        const diff = shiftedCode - _zCode;
-        shiftedCode = first + diff;
-      }
-      const encodedChar = String.fromCharCode(shiftedCode);
-      encoded += encodedChar;
-    }
-    return encoded;
+    return _crypt(this, str, 1);
   }
 
   decode(str) {
-    let decoded = '';
-    for (let i = 0; i < str.length; i++) {
-      const strChar = str[i];
-      const strCharCode = strChar.charCodeAt(0);
-      const keyIndex = i % this.key.length;
-      const keyChar = this.key[keyIndex];
-      const keyCharCode = keyChar.charCodeAt(0);
-      let shiftedCode = strCharCode - this._map[keyChar];
-      if (shiftedCode < _aCode) {
-        const last = _zCode + 1;
-        const diff = _aCode - shiftedCode;
-        shiftedCode = last - diff;
-      }
-      decoded += String.fromCharCode(shiftedCode);
-    }
-    return decoded;
+    return _crypt(this, str, -1);
   }
 }
 
